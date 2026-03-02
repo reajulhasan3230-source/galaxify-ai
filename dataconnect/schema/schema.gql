@@ -1,0 +1,44 @@
+type User @table {
+  email: String!
+  passwordHash: String!
+  createdAt: Timestamp!
+  subscriptionType: SubscriptionType!
+  displayName: String
+  profilePictureUrl: String
+  bio: String
+  resumePdfUrl: String
+}
+
+type SubscriptionType @table {
+  name: String!
+  description: String!
+  price: Float
+  features: [String]
+}
+
+type Theme @table {
+  name: String!
+  imageUrl: String!
+  isPremium: Boolean!
+  description: String
+}
+
+type Portfolio @table {
+  user: User!
+  theme: Theme!
+  status: String!
+  slug: String!
+  customDomain: String
+}
+
+type ProfessionalDetail @table {
+  user: User!
+  portfolio: Portfolio!
+  type: String!
+  title: String!
+  description: String
+  startDate: Date
+  endDate: Date
+  imageUrl: String
+  link: String
+}
