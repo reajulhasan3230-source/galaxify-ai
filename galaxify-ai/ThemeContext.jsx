@@ -2,16 +2,16 @@ import React, { createContext, useContext, useState, useMemo } from 'react';
 
 // Import theme configurations
 // Assuming these files export the theme objects (colors, 3D settings, etc.)
-import * as galaxy from '../themes/galaxy';
-import * as lava from '../themes/lava';
-import * as forest from '../themes/forest';
-import * as neon from '../themes/neon';
+import * as galaxy from '../src/GalaxyTheme';
+import * as lava from '../src/LavaTheme';
+import * as forest from '../src/ForestTheme';
+import * as neon from '../src/NeonTheme';
 
 const THEMES = {
   galaxy,
-  lava,   // Pro
-  forest, // Pro
-  neon,   // Pro
+  lava,
+  forest,
+  neon,
 };
 
 const ThemeContext = createContext({

@@ -1,46 +1,71 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
-
-// Layout Components
-// import Navbar from './components/Navbar'; // Uncomment once Navbar.jsx is created
-// import Footer from './components/Footer'; // Uncomment once Footer.jsx is created
+import { ThemeProvider } from './ThemeContext';
 
 // Pages
-import Login from './pages/Login'; // This will need to be created
-import Dashboard from './pages/Dashboard'; // This will need to be created
-import Preview from './pages/Preview';
-import Portfolio from './pages/Portfolio';
+import Login from './Login'; 
+import Home from './Home';
+import Dashboard from './Dashboard'; 
+import Portfolio from './Portfolio';
+import Register from './Register';
+import CreatePortfolio from './CreatePortfolio';
+import Pricing from './Pricing';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("App Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className="min-h-screen flex items-center justify-center bg-black text-red-500 p-4">Error: {this.state.error.message}</div>;
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
-          {/* --- Default Route for Testing --- */}
-          {/* Redirect root to the Preview page for now. Change this to "/login" when ready. */}
-          <Route path="/" element={<Navigate to="/preview" replace />} />
+          {/* Redirect root to Login */}
+          <Route path="/" element={<Home />} />
           
-          {/* --- Public / Authentication (Commented out until Login.jsx is created) --- */}
-          {/* <Route path="/login" element={<Login />} /> */}
+          {/* Authentication Route */}
+          <Route path="/login" element={<Login />} />
 
-          {/* --- Creator Dashboard (Commented out until Dashboard.jsx is created) --- */}
-          {/* <Route
-            path="/dashboard"
-            element={
-              <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-                <Navbar />
-                <main className="flex-grow">
-                  <Dashboard />
-                </main>
-                <Footer />
-              </div>
-            }
-          /> */}
+          <Route path="/register" element={<Register />} />
 
-          {/* --- Theme Preview --- */}
-          <Route path="/preview" element={<Preview />} />
+          {/* User Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/create-portfolio" element={<CreatePortfolio />} />
+          <Route path="/pricing" element={<Pricing />} />
 
-<!--
-[PROMPT_SUGGESTION]Create the `src/pages/Login.jsx` component so I can enable the login route.[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]Create placeholder files for `Navbar.jsx`, `Footer.jsx`, and `Dashboard.jsx` to resolve the remaining imports.[/PROMPT_SUGGESTION]
+          {/* Public Portfolio View */}
+          <Route path="/portfolio/:username" element={<Portfolio />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
+
+export default function AppWithBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}

@@ -3,7 +3,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize Gemini API
 // Ensure VITE_GEMINI_API_KEY is set in your .env file
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Helper to get the model safely, preventing top-level crashes if API key is missing
+const getModel = () => {
+  if (!API_KEY) {
+    console.error("VITE_GEMINI_API_KEY is missing. Please add it to your .env file.");
+    throw new Error("Gemini API Key is missing");
+  }
+  const genAI = new GoogleGenerativeAI(API_KEY);
+  return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+};
 
 /**
  * Extracts structured portfolio data from a PDF file (base64 encoded).
@@ -15,7 +23,7 @@ export const extractPortfolioFromPdf = async (pdfBase64) => {
     // Remove data URI prefix if present (e.g., "data:application/pdf;base64,")
     const pdfData = pdfBase64.split(',')[1] || pdfBase64;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getModel();
 
     const prompt = `
       You are an expert data extraction assistant. 
@@ -76,10 +84,9 @@ export const extractPortfolioFromPdf = async (pdfBase64) => {
  */
 export const parseResumeText = async (text) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getModel();
 
-    const prompt = `
-      Analyze the provided resume text and extract the data into a strict JSON object.
+    const prompt = `Analyze the provided resume text and extract the data into a strict JSON object.
       
       Requirements:
       1. "bio" must be written in a "Cinematic" tone (epic, impressive, narrative).
@@ -117,7 +124,7 @@ export const parseResumeText = async (text) => {
  */
 export const generatePortfolioContent = async (resumeText) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getModel();
 
     const prompt = `Act as a professional portfolio copywriter. Return ONLY a JSON object with keys: full_name, tagline (5 words max), about_me (cinematic style), skills (categorized array), and experience_highlights. Do not include any markdown formatting or extra text in the response so I can parse it immediately with JSON.parse().`;
 
@@ -131,6 +138,71 @@ export const generatePortfolioContent = async (resumeText) => {
     return JSON.parse(jsonString);
   } catch (error) {
     console.error("Error generating portfolio content:", error);
+    throw error;
+  }
+};
+
+/**
+ * Alias for extractPortfolioFromPdf to match requested function name.
+ */
+export const extractFromPDF = extractPortfolioFromPdf;
+
+/**
+ * Generates a specific bio from resume text.
+ * @param {string} resumeText 
+ * @returns {Promise<string>}
+ */
+export const generateBio = async (resumeText) => {
+  try {
+    const model = getModel();
+    const prompt = `Write a professional and engaging bio (max 150 words) based on the following resume text. Tone: Cinematic and impressive. Return only the bio text.`;
+    const result = await model.generateContent([prompt, resumeText]);
+    return result.response.text();
+  } catch (error) {
+    console.error("Error generating bio:", error);
+    throw error;
+  }
+};
+
+/**
+ * Generates a list of skills from resume text.
+ * @param {string} resumeText 
+ * @returns {Promise<string[]>}
+ */
+export const generateSkills = async (resumeText) => {
+  try {
+    const model = getModel();
+    const prompt = `Extract the top 15 technical and soft skills from the resume text. Return ONLY a JSON array of strings.`;
+    const result = await model.generateContent([prompt, resumeText]);
+    const text = result.response.text();
+    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Error generating skills:", error);
+    throw error;
+  }
+};
+
+/**
+ * Formats arbitrary data into the portfolio JSON schema.
+ * @param {Object} data 
+ * @returns {Promise<Object>}
+ */
+export const formatPortfolioJSON = async (data) => {
+  try {
+    const model = getModel();
+    const prompt = `
+      Organize the following data into a structured JSON object for a portfolio website.
+      Ensure the following keys exist: fullName, tagline, bio, skills, experience, projects, contact.
+      Data: ${JSON.stringify(data)}
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Error formatting portfolio JSON:", error);
     throw error;
   }
 };

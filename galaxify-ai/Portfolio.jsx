@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPortfolioByUsername } from '../services/portfolioService';
-import { useTheme } from '../context/ThemeContext';
-import ThreeScene from '../components/ThreeScene';
-import ProGate from '../components/ProGate';
+import { getPortfolioByUsername } from './portfolioService';
+import { useTheme } from './ThemeContext';
+import ThreeScene from './ThreeScene';
+import ProGate from './ProGate';
 
 // Space Nebula Spinner Component
 const NebulaSpinner = () => (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import ThreeScene from '../components/ThreeScene';
-import ProGate from '../components/ProGate';
+import { useTheme } from './ThemeContext';
+import ThreeScene from '../galaxify-ai/ThreeScene';
+import ProGate from './ProGate';
 
 const Preview = ({ user = { plan: 'free' } }) => {
   const { theme: globalTheme, themeId } = useTheme();
